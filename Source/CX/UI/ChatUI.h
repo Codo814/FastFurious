@@ -16,9 +16,9 @@ UCLASS()
 class CX_API UChatUI : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
-	void OnNewChatMessage(const FString& Sender, const FString& Message);
+	void OnNewChatMessage(const FString& InSender, const FString& InMessage);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -26,7 +26,7 @@ protected:
 
 protected:
 	UFUNCTION()
-	void OnChatInputTextCommiteed(const FText& Text, ETextCommit::Type CommitMethod);
+	void OnChatInputTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 protected:
 	UPROPERTY(meta = (BindWidget))

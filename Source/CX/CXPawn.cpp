@@ -10,6 +10,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ChaosWheeledVehicleMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerState/CXPlayerState.h"
 
 #define LOCTEXT_NAMESPACE "VehiclePawn"
 
@@ -85,6 +87,9 @@ void ACXPawn::SetupPlayerInputComponent(class UInputComponent* PlayerInputCompon
 
 		// reset the vehicle 
 		EnhancedInputComponent->BindAction(ResetVehicleAction, ETriggerEvent::Triggered, this, &ACXPawn::ResetVehicle);
+
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ACXPawn::InputAttack);
+
 	}
 	else
 	{
@@ -105,6 +110,35 @@ void ACXPawn::Tick(float Delta)
 	CameraYaw = FMath::FInterpTo(CameraYaw, 0.0f, Delta, 1.0f);
 
 	BackSpringArm->SetRelativeRotation(FRotator(0.0f, CameraYaw, 0.0f));
+}
+
+float ACXPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	ACXPawn* Attacker = Cast<ACXPawn>(DamageCauser);
+	if (ActualDamage <= 0 || DamageCauser == this || HasAuthority() == false || Attacker == nullptr)
+	{
+		return 0.f;
+	}
+
+	//맞은사람
+	ACXPlayerState* VictimPlayerState = GetPlayerState<ACXPlayerState>();
+	//때린사람
+	ACXPlayerState* AttackerPlayerState = Attacker->GetPlayerState<ACXPlayerState>();
+	
+	const int32 TransferCoinAmount = (int32)ActualDamage;
+	if (VictimPlayerState->TryRemoveCoins((int32)TransferCoinAmount))
+	{
+		UE_LOG(LogTemplateVehicle, Warning, TEXT("%s transferred %d coins to %s"),
+			*GetNameSafe(VictimPlayerState), TransferCoinAmount, *GetNameSafe(AttackerPlayerState));
+		AttackerPlayerState->AddCoins(TransferCoinAmount);
+	}
+	else
+	{
+		UE_LOG(LogTemplateVehicle, Warning, TEXT("%s has no coins to transfer %s"),
+			*GetNameSafe(VictimPlayerState), *GetNameSafe(AttackerPlayerState));
+	}
+	return ActualDamage;
 }
 
 void ACXPawn::Steering(const FInputActionValue& Value)
@@ -194,7 +228,7 @@ void ACXPawn::ResetVehicle(const FInputActionValue& Value)
 	FRotator ResetRotation = GetActorRotation();
 	ResetRotation.Pitch = 0.0f;
 	ResetRotation.Roll = 0.0f;
-	
+
 	// teleport the actor to the reset spot and reset physics
 	SetActorTransform(FTransform(ResetRotation, ResetLocation, FVector::OneVector), false, nullptr, ETeleportType::TeleportPhysics);
 
@@ -202,6 +236,32 @@ void ACXPawn::ResetVehicle(const FInputActionValue& Value)
 	GetMesh()->SetPhysicsLinearVelocity(FVector::ZeroVector);
 
 	UE_LOG(LogTemplateVehicle, Error, TEXT("Reset Vehicle"));
+}
+
+void ACXPawn::InputAttack(const FInputActionValue& value)
+{
+	ClientToServerAttack();
+}
+
+void ACXPawn::ClientToServerAttack_Implementation()
+{
+	const FVector Start = GetActorLocation();
+	const FVector End = Start + GetActorForwardVector() * 700.0f;
+
+	UWorld* World = GetWorld();
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	if (FHitResult HitResult; World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params))
+	{
+		AActor* Actor = HitResult.GetActor();
+		UE_LOG(LogTemplateVehicle, Warning, TEXT("Attact trace hit: %s"), *GetNameSafe(HitResult.GetActor()));
+		if(ACXPawn* CXPawn = Cast<ACXPawn>(Actor))
+		{
+			UGameplayStatics::ApplyDamage(CXPawn, 5.f, GetController(), this, nullptr);
+		}
+	}
+	
 }
 
 #undef LOCTEXT_NAMESPACE

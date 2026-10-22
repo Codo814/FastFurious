@@ -6,8 +6,6 @@
 #include "GameFramework/GameModeBase.h"
 #include "CXGameMode.generated.h"
 
-class APlayerStart;
-
 UCLASS(MinimalAPI)
 class ACXGameMode : public AGameModeBase
 {
@@ -18,6 +16,9 @@ public:
 
 protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+
+	/** Called after a successful login.  This is the first place it is safe to call replicated functions on the PlayerController. */
+	virtual void PostLogin(APlayerController* NewPlayer);
 
 private:
 	bool IsPlayerStartAvailable(const APlayerStart* PlayerStart) const;
@@ -30,6 +31,3 @@ private:
 	FVector VehicleSpawnCheckOffset = FVector(0.0, 0.0, 80.0);
 
 };
-
-
-

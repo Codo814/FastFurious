@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "Subsystem/ChatSubsystem.h"
 #include "CXPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -19,8 +20,12 @@ class CX_API ACXPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
-	protected:
+protected:
 	friend class UChatUI;
+	friend class ACXGameMode;
+
+	UFUNCTION(Client, Reliable)
+	void ServerToClientChatLog(const TArray<FChatData>& ChatLog);
 
 	UFUNCTION(Server, Reliable)
 	void ClientToServerChatMessage(const FString& Message);
