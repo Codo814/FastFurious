@@ -11,6 +11,7 @@ class USpringArmComponent;
 class UInputAction;
 class UChaosWheeledVehicleMovementComponent;
 struct FInputActionValue;
+class UParticleSystem;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateVehicle, Log, All);
 
@@ -78,7 +79,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputAction* AttackAction;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	UParticleSystem* HitParticle;
 
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
@@ -99,6 +101,9 @@ public:
 	// End Actor interface
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)override;
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastHitEffect(const FVector& TraceStart, const FVector& TraceEnd, bool bHitVehicle, const FVector& ImpactPoint, const FVector& ImpactNormal);
 
 protected:
 

@@ -13,7 +13,13 @@ class ACXGameMode : public AGameModeBase
 
 public:
 	ACXGameMode();
-
+	virtual void BeginPlay() override;
+protected:
+	void StartWaitingCountdown();
+	void HandleWaitingTimerTick();
+	void StartPlayingState();
+	void HandlePlayingTimerTick();
+	void FinishGame();
 protected:
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
@@ -30,4 +36,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	FVector VehicleSpawnCheckOffset = FVector(0.0, 0.0, 80.0);
 
+	FTimerHandle GameTimerHandle;
+
+	bool bWaitingContdownStarted = false;
 };

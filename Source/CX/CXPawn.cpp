@@ -141,6 +141,7 @@ float ACXPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	return ActualDamage;
 }
 
+
 void ACXPawn::Steering(const FInputActionValue& Value)
 {
 	// get the input magnitude for steering
@@ -243,6 +244,18 @@ void ACXPawn::InputAttack(const FInputActionValue& value)
 	ClientToServerAttack();
 }
 
+void ACXPawn::MulticastHitEffect_Implementation(const FVector& TraceStart, const FVector& TraceEnd, bool bHitVehicle,const FVector& ImpactPoint,const FVector& ImpactNormal)
+{
+	UWorld* World = GetWorld();
+	DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1.0f, 0, 5.0f);
+	
+	if (!bHitVehicle)
+	{
+		return;
+	}
+	UGameplayStatics::SpawnEmitterAtLocation(World, HitParticle, ImpactPoint, ImpactNormal.Rotation());
+}
+
 void ACXPawn::ClientToServerAttack_Implementation()
 {
 	const FVector Start = GetActorLocation();
@@ -252,16 +265,21 @@ void ACXPawn::ClientToServerAttack_Implementation()
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
-	if (FHitResult HitResult; World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params))
+
+	bool bHitVehicle = false;
+	FHitResult HitResult;
+	if (World->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, Params))
 	{
 		AActor* Actor = HitResult.GetActor();
 		UE_LOG(LogTemplateVehicle, Warning, TEXT("Attact trace hit: %s"), *GetNameSafe(HitResult.GetActor()));
 		if(ACXPawn* CXPawn = Cast<ACXPawn>(Actor))
 		{
+			bHitVehicle = true;
 			UGameplayStatics::ApplyDamage(CXPawn, 5.f, GetController(), this, nullptr);
 		}
 	}
-	
+
+	MulticastHitEffect(Start, End, bHitVehicle, HitResult.ImpactPoint, HitResult.ImpactNormal );
 }
 
 #undef LOCTEXT_NAMESPACE
