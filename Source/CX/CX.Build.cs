@@ -12,5 +12,6 @@ public class CX : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "ChaosVehicles", "PhysicsCore" });
 		PublicDependencyModuleNames.AddRange(new string[] { "UMG", "SlateCore" });
-	}
+        PrivateDependencyModuleNames.AddRange(new string[] { "Niagara" });
+    }
 }

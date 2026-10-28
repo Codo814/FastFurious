@@ -110,6 +110,20 @@ void ACXPawn::Tick(float Delta)
 	CameraYaw = FMath::FInterpTo(CameraYaw, 0.0f, Delta, 1.0f);
 
 	BackSpringArm->SetRelativeRotation(FRotator(0.0f, CameraYaw, 0.0f));
+	const ACXPlayerState* CXPlayerState = GetPlayerState<ACXPlayerState>();
+	const float BonusSpeedKmh = CXPlayerState ? CXPlayerState->GetBonusMaxSpeed() : 0.0f;
+	const float MaxSpeedCmPerSec = (MaxSpeedKmh + BonusSpeedKmh) / 0.036f;
+
+	FVector Velocity = GetMesh()->GetPhysicsLinearVelocity();
+	const FVector Forward = GetActorForwardVector();
+	const float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
+
+	if (ForwardSpeed > MaxSpeedCmPerSec)
+	{
+		// 전방 성분만 제한해서 좌우 미끄러짐/낙하 속도는 보존
+		Velocity += Forward * (MaxSpeedCmPerSec - ForwardSpeed);
+		GetMesh()->SetPhysicsLinearVelocity(Velocity);
+	}
 }
 
 float ACXPawn::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -153,11 +167,9 @@ void ACXPawn::Steering(const FInputActionValue& Value)
 
 void ACXPawn::Throttle(const FInputActionValue& Value)
 {
-	// get the input magnitude for the throttle
-	float ThrottleValue = Value.Get<float>();
-
-	// add the input
-	ChaosVehicleMovement->SetThrottleInput(ThrottleValue);
+	// Tick()?? ?? ?? ??? ????? ????.
+	// ??? ??? ?? 120 ??? ????? ?? ???? ??? ???.
+	ChaosVehicleMovement->SetThrottleInput(Value.Get<float>());
 }
 
 void ACXPawn::Brake(const FInputActionValue& Value)
@@ -247,13 +259,24 @@ void ACXPawn::InputAttack(const FInputActionValue& value)
 void ACXPawn::MulticastHitEffect_Implementation(const FVector& TraceStart, const FVector& TraceEnd, bool bHitVehicle,const FVector& ImpactPoint,const FVector& ImpactNormal)
 {
 	UWorld* World = GetWorld();
+
 	DrawDebugLine(World, TraceStart, TraceEnd, FColor::Red, false, 1.0f, 0, 5.0f);
-	
+
 	if (!bHitVehicle)
 	{
 		return;
 	}
-	UGameplayStatics::SpawnEmitterAtLocation(World, HitParticle, ImpactPoint, ImpactNormal.Rotation());
+
+	UGameplayStatics::SpawnEmitterAtLocation(
+		World, HitParticle, ImpactPoint, ImpactNormal.Rotation()
+	);
+
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(
+			this, HitSound, ImpactPoint
+		);
+	}
 }
 
 void ACXPawn::ClientToServerAttack_Implementation()

@@ -11,6 +11,7 @@ class UPrimitiveComponent;
 class USphereComponent;
 class UParticleSystem;
 class USoundBase;
+class UNiagaraSystem;
 
 UCLASS()
 class CX_API ACXSpeedBuffItem : public AActor
@@ -45,7 +46,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "SpeedBuff")
 	TObjectPtr<UStaticMeshComponent> ItemMesh;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SpeedBuff")
-	TObjectPtr<UParticleSystem> PickupParticle;
+	TObjectPtr<UNiagaraSystem> PickupNiagara;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "SpeedBuff")
 	TObjectPtr<USoundBase> PickupSound;
 

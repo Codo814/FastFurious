@@ -3,6 +3,7 @@
 
 #include "GameState/CXGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "PlayerState/CXPlayerState.h"	
 
 void ACXGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -30,4 +31,9 @@ void ACXGameState::SetRemainingTime(int32 NewRemainingTime)
 		}
 		RemainingTime = FMath::Max(0, NewRemainingTime);
 	}
+}
+
+bool ACXGameState::IsWinner(const APlayerState* PlayerState) const
+{
+	return Winners.Contains(Cast<ACXPlayerState>(PlayerState));
 }

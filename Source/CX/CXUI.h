@@ -28,6 +28,7 @@ protected:
 #pragma endregion
 
 protected:
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	/** Controls the display of speed in Km/h or MPH */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Vehicle)

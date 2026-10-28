@@ -9,6 +9,8 @@
 #include "sound/SoundBase.h"
 #include "PlayerState/CXPlayerState.h"
 #include "CXPawn.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 
 
 // Sets default values
@@ -78,9 +80,9 @@ void ACXCoinItem::MulticastPickupEffects_Implementation()
 {
 	UWorld* World = GetWorld();
 
-	if (IsValid(PickupParticle))
+	if (IsValid(PickupNiagara))
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(World, PickupParticle, GetActorLocation());
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, PickupNiagara, GetActorLocation());
 	}
 
 	if(IsValid(PickupSound))

@@ -12,6 +12,7 @@ class UInputAction;
 class UChaosWheeledVehicleMovementComponent;
 struct FInputActionValue;
 class UParticleSystem;
+class USoundBase;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateVehicle, Log, All);
 
@@ -82,6 +83,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
 	UParticleSystem* HitParticle;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Effects")
+	TObjectPtr<USoundBase> HitSound;
+
+
 	/** Keeps track of which camera is active */
 	bool bFrontCameraActive = false;
 
@@ -141,6 +146,9 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void ClientToServerAttack();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Vehicle|Speed")
+	float MaxSpeedKmh = 120.0f;
 
 public:
 	/** Returns the front spring arm subobject */

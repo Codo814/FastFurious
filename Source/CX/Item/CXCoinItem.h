@@ -11,6 +11,7 @@ class UPrimitiveComponent;
 class USphereComponent;
 class UParticleSystem;
 class USoundBase;
+class UNiagaraSystem;
 
 UCLASS()
 class CX_API ACXCoinItem : public AActor
@@ -44,8 +45,9 @@ protected:
 	TObjectPtr<USphereComponent> OverlapSphere;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Coin")
 	TObjectPtr<UStaticMeshComponent> ItemMesh;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Coin")
-	TObjectPtr<UParticleSystem> PickupParticle;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "coin")
+	TObjectPtr<UNiagaraSystem> PickupNiagara;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Coin")
 	TObjectPtr<USoundBase> PickupSound;
 

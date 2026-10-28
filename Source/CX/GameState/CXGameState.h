@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "CXGameState.generated.h"
 
 class ACXPlayerState;
@@ -31,7 +32,11 @@ public:
 
 	void SetRemainingTime(int32 NewRemainingTime);
 
+	EGameState GetCurrentGameState() const { return CurrentGameState; }
+
 	int32 GetRemainingTime() const { return RemainingTime; }
+
+	bool IsWinner(const APlayerState* PlayerState) const;
 
 protected:
 

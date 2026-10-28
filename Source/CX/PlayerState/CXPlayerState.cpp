@@ -92,5 +92,5 @@ void ACXPlayerState::AddBonusMaxSpeed(float Amount)
 
 FString ACXPlayerState::GetPlayerStateInfo() const
 {
-	return FString::Printf(TEXT("Coins: %d, BonusMaxSpeed: %.2f"), Coins, BonusMaxSpeed);
+	return FString::Printf(TEXT("Coins: %d / BonusMaxSpeed: %.2f"), Coins, BonusMaxSpeed);
 }
